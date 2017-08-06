@@ -354,12 +354,10 @@ def clean(src, src_path, dst, dst_path, fmt, parent_fmt, keep=0):
     src_voldir, src_volname = os.path.split(src_path)
     fmt = string.Template(fmt).safe_substitute(name=src_volname)
     parent_fmt = string.Template(parent_fmt).safe_substitute(name=src_volname)
-    src_snapshot_names = src.list_subvolumes(src_voldir, snapshot=True,
-                                             readonly=True)
+    src_snapshot_names = src.list_subvolumes(src_voldir, readonly=True)
     src_snapshots = parse_subvols(src_snapshot_names, fmt)
     dst_subvols = dst.list_subvolumes(dst_path)
-    dst_snapshot_names = dst.list_subvolumes(dst_path, snapshot=True,
-                                             readonly=True)
+    dst_snapshot_names = dst.list_subvolumes(dst_path, readonly=True)
     dst_snapshots = parse_subvols(dst_snapshot_names, parent_fmt)
     # Remove snapshots that exist in src but are not a subvolume in dst
     src_rm_snapshots = [x[0] for x in src_snapshots if x[0] not in dst_subvols]
