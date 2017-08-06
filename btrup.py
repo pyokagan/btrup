@@ -321,7 +321,7 @@ def backup(src, src_path, dst, dst_path, fmt, parent_fmt, blksize=0, bwlimit=0,
     parent_fmt = string.Template(parent_fmt).safe_substitute(name=src_volname)
     # Get dst subvolumes and snapshots
     dst_subvols = dst.list_subvolumes(dst_path)
-    dst_snapshots = dst.list_subvolumes(dst_path, snapshot=True, readonly=True)
+    dst_snapshots = dst.list_subvolumes(dst_path, readonly=True)
     # Find suitable parent snapshot
     src_parent = find_parent(src_snapshots, dst_snapshots, parent_fmt)
     if src_parent:
