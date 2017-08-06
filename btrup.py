@@ -16,6 +16,9 @@ import time
 import uuid
 
 
+logger = logging.getLogger(__name__)
+
+
 class Host(object):
     def __init__(self):
         self._devnull = open(os.devnull, 'wb')
@@ -102,12 +105,13 @@ class Host(object):
 
 
 class LocalHost(Host):
-    def _popen(self, *args, **kwargs):
+    def _popen(self, cmd, *args, **kwargs):
         if 'stdout' not in kwargs:
             kwargs['stdout'] = self._devnull.fileno()
         if 'stdin' not in kwargs:
             kwargs['stdin'] = subprocess.PIPE
-        return subprocess.Popen(*args, **kwargs)
+        logger.debug('%s: running %s', self, cmd)
+        return subprocess.Popen(cmd, *args, **kwargs)
 
     def __str__(self):
         return 'localhost'
@@ -146,6 +150,7 @@ class SSHHost(Host):
             kwargs['stdin'] = subprocess.PIPE
         if 'shell' in kwargs:
             del kwargs['shell']  # For SSH, shell is always True
+        logger.debug('%s: running %s', self, cmd)
         p = subprocess.Popen(cmd, *args, **kwargs)
         return p
 
@@ -395,6 +400,8 @@ def main(args=None, prog=None):
     if args is None:
         args = sys.argv[1:]
     p = argparse.ArgumentParser(prog=prog)
+    p.add_argument('-v', '--verbose', default=False, action='store_true',
+                   help='Enable verbose logging')
     p.add_argument('--progress', default=False, action='store_true',
                    help='Show progress')
     p.add_argument('--bwlimit', default=0, type=int, dest='bwlimit',
@@ -412,6 +419,7 @@ def main(args=None, prog=None):
     p.add_argument('dest',
                    help='btrfs volume dest')
     args = p.parse_args(args)
+    logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO)
     try:
         bwlimit = args.bwlimit * 1000  # in kB
         btrup(args.src, args.dest, args.fmt, args.parent_fmt, args.blksize,
